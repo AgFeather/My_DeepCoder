@@ -19,7 +19,7 @@ hidden_units = 256
 
 
 def data_process():
-    f = open('tt.json')
+    f = open('testdataset.json')
     dataset = json.load(f)
     x_dataset = []
     y_dataset = []

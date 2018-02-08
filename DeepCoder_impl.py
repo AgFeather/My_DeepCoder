@@ -9,7 +9,8 @@ class deep_coder(object):
     def __init__(self):
         self.num_input = 3 #number of inputs(parameters) of a program
         self.embedding_size = 20#Dimension of the integer embedding
-        self.integer_range = 256 + 1#range of all possible outputs of a program
+        self.integer_max = 256 #range of all possible outputs of a program
+        self.integer_min = -255
         self.num_example = 5
         self.max_list_len = 20 #maximum length of a input/output list
         self.num_hidden_layer = 3
@@ -17,7 +18,8 @@ class deep_coder(object):
         self.attribute_size = 34
         self.batch_size = 1
         self.num_epoch = 100
-        self.learning_rate = 0.01
+        self.learning_rate = 0.001
+        np.set_printoptions(precision=3)
         
 
     def build_model(self):
@@ -35,7 +37,7 @@ class deep_coder(object):
         #trainable variable
         #integer embedding 
         self.integer_embedding = tf.Variable(tf.random_normal([
-            self.integer_range + 1, self.embedding_size]), name='integer_embedding')
+            -self.integer_min + self.integer_max + 1, self.embedding_size]), name='integer_embedding')
         #对于每个integer in integer range，embedding size 大小的vector表示
         #负数？
         
@@ -65,9 +67,14 @@ class deep_coder(object):
         #       value:[batch_size, num_example, num_input + 1, max_list_len]
         types, values = tf.split(x, [2, self.max_list_len], axis=3)
         sess = tf.Session()
-        
+        constant_add = tf.constant(
+            value=-self.integer_min,shape=[
+            self.batch_size,self.num_example,self.num_input+1,self.max_list_len],dtype=tf.int32)
 
         #output:[batch_size, num_example, num_input + 1, max_list_len, embedding_size]
+
+        values = tf.add(values,constant_add)
+
         value_embeded = tf.nn.embedding_lookup(self.integer_embedding, values)
         value_embeded_reduced = tf.reshape(value_embeded,
             [-1, self.num_example, self.num_input + 1, self.max_list_len * self.embedding_size])
@@ -125,14 +132,16 @@ class deep_coder(object):
             saver = tf.train.Saver()
             feed = {}
             for ep in range(1, self.num_epoch + 1): #101
-                for _ in range(len(data) // self.batch_size):
+                for i in range(len(data) // self.batch_size):
                     train_data_batch, train_target_batch = get_batch(train_data, train_target)
                     feed = {self.prog_data:train_data_batch, self.attribute:train_target_batch}
                     sess.run(self.optimizer, feed)
                     loss, summary = sess.run([self.loss, self.summary_op], feed)
 
                 #report loss every epoch
-                    print('epoch: ',ep, 'loss: ', loss)
+                    if i%10000 == 0:
+                        print('epoch: ',ep, 'loss: ', loss)
+
 
                 #evaluate model every 10 epoches
                 if ep%10 == 0:
@@ -142,11 +151,14 @@ class deep_coder(object):
                         })
                     self.summary_writer.add_summary(summary, ep)
                     print('epoch: ',ep, 'Test loss: ',test)
+                    print("tensor is \n{}".format(sess.run(self.decoded, feed)))
+                    print("attribute is\n {}".format(sess.run(self.attribute, feed)))
+
+
 
                 #save model every 20 epoches
                 if ep%20 == 0:
-               #     saver.save(sess, os.path.join('./','model/model'), global_step=ep)
-
+                    saver.save(sess, os.path.join('./','model/model'), global_step=ep)
     def predict(self, data):
         with tf.Session() as sess:
             saver = tf.train.Saver()
