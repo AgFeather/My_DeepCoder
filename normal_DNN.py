@@ -19,7 +19,7 @@ hidden_units = 256
 
 
 def data_process():
-    f = open('dataset.json')
+    f = open('testdataset.json')
     dataset = json.load(f)
     input_examples = []
     output_examples = []
@@ -257,7 +257,7 @@ class ML_Model(object):
             sess.run(tf.global_variables_initializer())
 
 
-            for i in range(0,5000000):
+            for i in range(0,50000):
                 input_batch = random.sample(self.input_data,self.batch_size)
                 output_batch = random.sample(self.output_data,self.batch_size)
                 feed = {input_x:input_batch,y_label:output_batch}
