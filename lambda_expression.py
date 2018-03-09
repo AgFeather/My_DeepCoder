@@ -22,11 +22,11 @@ first_order_function = {1:['head', lambda xs: xs[0] if len(xs)>0 else None, [1],
 						10:['sum', lambda xs: sum(xs), [1], [0]]
 						}
 
-higher_order_function = {11:['map', lambda f, xs: [f(x) for x in xs], [1, 2], [1]],
-						 12:['filter', lambda f, xs: [x for x in xs if f(x)], [1, 2], [1]],
-						 13:['count', lambda f, xs: len([x for x in xs if f(x)]), [1, 2], [0]],
-						 14:['zipwith', lambda f, xs ,ys: [f(x, y) for (x, y) in zip(xs, ys)], [1, 1, 2], [1]],
-						 15:['scanl1', lambda f, xs: scanl1_func(f, xs), [1, 2], [1]]
+higher_order_function = {11:['map', lambda f, xs: [f(x) for x in xs], [2, 1], [1]],
+						 12:['filter', lambda f, xs: [x for x in xs if f(x)], [2, 1], [1]],
+						 13:['count', lambda f, xs: len([x for x in xs if f(x)]), [2, 1], [0]],
+						 14:['zipwith', lambda f, xs ,ys: [f(x, y) for (x, y) in zip(xs, ys)], [2, 1, 1], [1]],
+						 15:['scanl1', lambda f, xs: scanl1_func(f, xs), [2, 1], [1]]
 					#	 scanl1 given a lambda function f mapping integer pairs to integers, and an array xs,
 					#	returns an array ys of the same length as xs and with its content defined by the recurrence 
 					#	ys[0] = xs[0], ys[n] = f(ys[n-1], xs[n]) for n>=1
@@ -69,9 +69,9 @@ probabilities = [0.1,0.3,0.2,0.1,0.5,0.4,0.7,0.4,0.2,0.1,0.4,0.2,0.7,0.1,0.1,0.3
     # num_attributes(34)
     # ]
 max_input_number = 3 #一个程序的最多输入参数个数
-program_input_list = [1,5,[0,2,2,10]]
-program_output = 12
-attributes = [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6 -8, 11]]
+program_output = [-12, -20, -32, -36, -68]
+attributes = [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
 
 
@@ -117,14 +117,15 @@ def create_program(function_list):
 
 	#do permutations operations for all functions in the list
 	program_list = list(itertools.permutations(function_list, len(function_list))) #get all possible programs with given functions
-#	print(program_list)
+	print(program_list)
 
 	for program in program_list:
 		flag, func_list = judge_program(program)
 		if flag:
 			print('we find the program: {}'.format(func_list))
 			return True, func_list
-		
+	
+
 
 def build_input_temp_value_map():
 	input_variable_map = {0:[], 1:[], 2:[], 3:[]}# 0 int; 1 array; 2 lambda function(for higher_order); 3 boolean
@@ -139,6 +140,7 @@ def build_input_temp_value_map():
 	return input_variable_map
 
 
+
 def judge_program(program):
 	func_list = []
 	input_variable_map = build_input_temp_value_map()
@@ -147,10 +149,10 @@ def judge_program(program):
 	for func in program:
 		if func>=16 and func<=34:
 			#means this function is a lambda expression for high_order_function
-			input_variable_map[3].append(func)
-#	print('input_variable_map: ',input_variable_map)
+			input_variable_map[2].append(func)
+	print('input_variable_map: ',input_variable_map)
 	for func in program:
-		
+		print('function number: ',func)
 		if func<=10 and func>=1:
 			#means this function is a first_order_function
 
@@ -167,21 +169,22 @@ def judge_program(program):
 
 			if len(input_type) == 1:
 				input_1 = input_type[0] #get the input type(only one) of this function
-				print(input_1)
+			#	print(input_1)
 				if len(input_variable_map[input_1]) == 0:
 					# means there is not any input_temp_value satisifing the input type of this fucntion
 					return False, None
 				else:
-					for values in input_variable_map[input_1]:
-						print(values)
+					values_list_1 = copy.deepcopy(input_variable_map[input_1])
+					for values in values_list_1:
+				#		print(values)
 						output_ = func_lambda(values)
-						print(output_, ' ?==', program_output)
+				#		print(output_, ' ?==', program_output)
 						if output_ == program_output:
 							return True, func_list
 						else:
 							
 							input_variable_map[output_type[0]].append(output_)
-							print(input_variable_map[output_type[0]])
+				#			print(input_variable_map[output_type[0]])
 
 
 			if len(input_type) == 2:
@@ -227,13 +230,15 @@ def judge_program(program):
 				input_1 = input_type[0] # lambda function
 				input_2 = input_type[1]
 				if len(input_variable_map[input_1]) == 0 or len(input_variable_map[input_2]) == 0:
+					print('error?')
 					return False, None
 				else:
 					values_list_1 = copy.deepcopy(input_variable_map[input_1])
 					values_list_2 = copy.deepcopy(input_variable_map[input_2])
 					for values_1 in values_list_1:
 						for values_2 in values_list_2:
-							output_ = func_lambda(values_1, values_2)
+							print('values_1', basic_function[values_1], 'values_2', values_2)
+							output_ = func_lambda(basic_function[values_1][1], values_2)
 							if output_ == program_output:
 								return True, func_list
 							else:
@@ -259,7 +264,7 @@ def judge_program(program):
 									input_variable_map[output_type[0]].append(output_)
 
 
-	print('finish')	
+	print('\n finish judgement, this is a wrong program')	
 	return False, None
 
 
@@ -279,8 +284,11 @@ if __name__ == '__main__':
 
 #	create_program([6, 12, 20, 26, 4])
 #	create_program([1,2,3,4,5])
-	flag, program = judge_program([11,12,13,14,15])
-	if flag:
-		print('finish', program)
+#	flag, program = judge_program([8,9,11,12,17,25])
+	flag1, program1 = judge_program([12, 11, 9, 8, 17, 25])
+	# program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6 -8, 11]]
+	# program_output = [-12, -20, -32, -36, -68]
+	if flag1:
+		print('right', program1)
 	else:
-		print('error')
+		print('wrong')
