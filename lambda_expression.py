@@ -4,9 +4,11 @@ import copy
 
 def scanl1_func(f, xs):
 	ys = []
-	ys[0] = xs[0]
+	ys.append(xs[0])
 	for i in range(1, len(xs)):
-		ys[i] = f(xs[i-1], xs[i])
+
+		ys.append(f(ys[i-1], xs[i]))
+	return ys
 
                        #number，function_name，lambda expression，lambda input type，lambda output type: 
                        #     0 means int; 1 means array; 2 means lambda function(for higher_order_fucntion); 3 means boolean
@@ -70,7 +72,7 @@ probabilities = [0.1,0.35,0.2,0.1,0.5,0.4,0.3,0.21,0.2,0.1,0.4,0.2,0.87,0.1,0.1,
     # num_attributes(34)
     # ]
 max_input_number = 3 #一个程序的最多输入参数个数
-program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6 -8, 11]]
+program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6, -8, 11]]
 program_output = [-12, -20, -32, -36, -68]
 # attributes = [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
@@ -82,7 +84,7 @@ def find_functions():
 		probabilities_tuple.append((probabilities[i], i))
 	func_prob_tuples = sorted(probabilities_tuple, key=lambda x:x[0], reverse=True)
 	# sort with the probilities and [0] means the most probable func
-	print(func_prob_tuples)
+#	print(func_prob_tuples)
 	
 	#DFS method to find a program
 	for i in range(0, 31):
@@ -101,27 +103,50 @@ def find_functions():
 						function_list.append(function3)
 						function_list.append(function4)
 						function_list.append(function5)
-						print(function_list)
+					#	print(function_list)
 						judge, program = create_program(function_list)
 						if judge == True:
-							return program
+							return True, program
+						else:
+							print('this is a wrong fucntion combination, lets check next')
+
+	return False, None
 
 
 
 
 import itertools
 def create_program(function_list):
-	print(function_list)
+#	print(function_list)
+
+	#check is there higher order function in function_list
+	#if we have higher_order_functions but we don not have 
+	#lambda expression for it, return False
+	count_higher_function = 0
+	count_basic_lambda = 0
+	for func in function_list:
+		if func>=16 and func<=34:
+			count_basic_lambda += 1
+		if func>=11 and func<=15:
+			count_higher_function += 1
+	if count_basic_lambda == 0 and count_higher_function != 0:
+		print('there is no basic lambda expression for higher_order_function, error')
+		return False, None
+
 
 	#do permutations operations for all functions in the list
 	program_list = list(itertools.permutations(function_list, len(function_list))) #get all possible programs with given functions
-	print(program_list)
+#	print(program_list)
 
 	for program in program_list:
+		print('\nwe will check program: ', program)
 		flag, func_list = judge_program(program)
 		if flag:
 			print('we find the program: {}'.format(func_list))
 			return True, func_list
+		else:
+			print('this is a wrong program, lets check next')
+	return False, None
 	
 
 
@@ -129,6 +154,7 @@ def create_program(function_list):
 def build_input_temp_value_map():
 	input_temp_values_map = {0:[], 1:[], 2:[], 3:[]}# 0 int; 1 array; 2 lambda function(for higher_order); 3 boolean
 #	input_variable_number=[0,0,0]
+#	print(program_input_list)
 	for i in program_input_list:
 		if isinstance(i, list):
 			input_temp_values_map[1].append(i)
@@ -136,6 +162,7 @@ def build_input_temp_value_map():
 		if isinstance(i, int):
 			input_temp_values_map[0].append(i)
 	#		input_variable_number[1]+=1
+#	print(input_temp_values_map)
 	return input_temp_values_map
 
 
@@ -145,15 +172,19 @@ def build_input_temp_value_map():
 def judge_program(program):
 	func_list = []
 	input_temp_values_map = build_input_temp_value_map()
-	print('input_temp_values_map: ',input_temp_values_map)
+
 	# add all lambda expression to input_temp_values_map first
 	for func in program:
 		if func>=16 and func<=34:
 			#means this function is a lambda expression for high_order_function
 			input_temp_values_map[2].append(func)
-	print('input_temp_values_map: ',input_temp_values_map)
+			func_name = basic_function[func][0]
+			func_list.append(func_name)
+#	print('input_temp_values_map: ',input_temp_values_map)
+
+
 	for func in program:
-		print('function number: ',func)
+#		print('function number: ',func)
 		if func<=10 and func>=1:
 			#means this function is a first_order_function
 
@@ -163,23 +194,20 @@ def judge_program(program):
 			output_type = first_order_function[func][3]
 			func_list.append(func_name)
 			print('func_name: ', func_name)
-			print(str(func_lambda))
-			print('input_type:', input_type)
-			print('output_type:', output_type)
-
+		#	print(str(func_lambda))
 
 			if len(input_type) == 1:
 				input_1 = input_type[0] #get the input type(only one) of this function
-			#	print(input_1)
 				if len(input_temp_values_map[input_1]) == 0:
 					# means there is not any input_temp_value satisifing the input type of this fucntion
 					return False, None
 				else:
 					values_list_1 = copy.deepcopy(input_temp_values_map[input_1])
 					for values in values_list_1:
-				#		print(values)
 						output_ = func_lambda(values)
-						print(output_, ' ?==', program_output)
+						print('input of lambda expression: ', values)
+						print('output of lambda expression: ', output_)
+						
 						if output_ == program_output:
 							return True, func_list
 						else:
@@ -198,8 +226,10 @@ def judge_program(program):
 					values_list_2 = copy.deepcopy(input_temp_values_map[input_2])
 					for values_1 in values_list_1:
 						for values_2 in values_list_2:
-						#	print('int:', values_1, 'list', values_2)
+						
 							output_ = func_lambda(values_1, values_2)
+							print('input of lambda expression: ', values_1, values_2)
+							print('output of lambda expression: ', output_)
 							if output_ == program_output:
 								return True, func_list
 							else:
@@ -221,9 +251,8 @@ def judge_program(program):
 			output_type = higher_order_function[func][3]
 			func_list.append(func_name)
 			print('func_name: ', func_name)
-			print(str(func_lambda))
-			print('input_type:', input_type)
-			print('output_type:', output_type)
+		#	print('input_type:', input_type)
+		#	print('output_type:', output_type)
 
 
 
@@ -238,9 +267,16 @@ def judge_program(program):
 					values_list_2 = copy.deepcopy(input_temp_values_map[input_2])
 					for values_1 in values_list_1:
 						for values_2 in values_list_2:
-					#		print('values_1', basic_function[values_1], 'values_2', values_2)
-							output_ = func_lambda(basic_function[values_1][1], values_2)
+						#	print('values_1', basic_function[values_1][0], 'values_2', values_2)
+
+							try:
+								output_ = func_lambda(basic_function[values_1][1], values_2)
+							except:
+								print('exception')
+								return False, None
 							print('output_: ',output_, 'program_output: ',program_output)
+							print('input of lambda expression: ', values_1, values_2)
+							print('output of lambda expression: ', output_)
 							if output_ == program_output:
 								return True, func_list
 							else:
@@ -260,13 +296,15 @@ def judge_program(program):
 						for values_2 in values_list_2:
 							for values_3 in values_list_3:
 								output_ = func_lambda(values_1, values_2, values_3)
+								# print('input of lambda expression: ', values_1, values_2, values_3)
+								# print('output of lambda expression: ', output_)
 								if output_ == program_output:
 									return True, func_list
 								else:
 									input_temp_values_map[output_type[0]].append(output_)
 
 #	print(input_temp_values_map)
-	print('\n finish judgement, this is a wrong program')	
+	# print('\n finish judgement, this is a wrong program')	
 	return False, None
 
 
@@ -287,10 +325,16 @@ if __name__ == '__main__':
 #	create_program([6, 12, 20, 26, 4])
 #	create_program([1,2,3,4,5])
 #	flag, program = judge_program([8,9,11,12,17,25])
+
+
 	flag1, program1 = judge_program([12, 11, 9, 8, 17, 25])
-	# program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6 -8, 11]]
-	# program_output = [-12, -20, -32, -36, -68]
+	program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6 -8, 11]]
+	program_output = [-12, -20, -32, -36, -68]
+
+#	flag1, program1 = find_functions()
+
+
 	if flag1:
-		print('right', program1)
+		print('\nright, it is the correct answer', program1)
 	else:
 		print('wrong')
