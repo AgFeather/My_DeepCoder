@@ -129,7 +129,8 @@ def create_program(function_list):
 			count_basic_lambda += 1
 		if func>=11 and func<=15:
 			count_higher_function += 1
-	if count_basic_lambda == 0 and count_higher_function != 0:
+	#if count_basic_lambda == 0 and count_higher_function != 0:
+	if count_basic_lambda != count_higher_function:
 		print('there is no basic lambda expression for higher_order_function, error')
 		return False, None
 
@@ -204,9 +205,12 @@ def judge_program(program):
 				else:
 					values_list_1 = copy.deepcopy(input_temp_values_map[input_1])
 					for values in values_list_1:
-						output_ = func_lambda(values)
-						print('input of lambda expression: ', values)
-						print('output of lambda expression: ', output_)
+						try:
+							output_ = func_lambda(values)
+						except:
+							return False, None
+					#	print('input of lambda expression: ', values)
+					#	print('output of lambda expression: ', output_)
 						
 						if output_ == program_output:
 							return True, func_list
@@ -226,10 +230,13 @@ def judge_program(program):
 					values_list_2 = copy.deepcopy(input_temp_values_map[input_2])
 					for values_1 in values_list_1:
 						for values_2 in values_list_2:
+							try:
 						
-							output_ = func_lambda(values_1, values_2)
-							print('input of lambda expression: ', values_1, values_2)
-							print('output of lambda expression: ', output_)
+								output_ = func_lambda(values_1, values_2)
+							except:
+								return False, None
+						#	print('input of lambda expression: ', values_1, values_2)
+						#	print('output of lambda expression: ', output_)
 							if output_ == program_output:
 								return True, func_list
 							else:
@@ -272,11 +279,11 @@ def judge_program(program):
 							try:
 								output_ = func_lambda(basic_function[values_1][1], values_2)
 							except:
-								print('exception')
+							#	print('exception')
 								return False, None
-							print('output_: ',output_, 'program_output: ',program_output)
-							print('input of lambda expression: ', values_1, values_2)
-							print('output of lambda expression: ', output_)
+							# print('output_: ',output_, 'program_output: ',program_output)
+							# print('input of lambda expression: ', values_1, values_2)
+							# print('output of lambda expression: ', output_)
 							if output_ == program_output:
 								return True, func_list
 							else:
@@ -295,7 +302,10 @@ def judge_program(program):
 					for values_1 in values_list_1:
 						for values_2 in values_list_2:
 							for values_3 in values_list_3:
-								output_ = func_lambda(values_1, values_2, values_3)
+								try:
+									output_ = func_lambda(values_1, values_2, values_3)
+								except:
+									return False, None
 								# print('input of lambda expression: ', values_1, values_2, values_3)
 								# print('output of lambda expression: ', output_)
 								if output_ == program_output:
@@ -326,12 +336,14 @@ if __name__ == '__main__':
 #	create_program([1,2,3,4,5])
 #	flag, program = judge_program([8,9,11,12,17,25])
 
+	# program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6 -8, 11]]
+	# program_output = [-12, -20, -32, -36, -68]
 
-	flag1, program1 = judge_program([12, 11, 9, 8, 17, 25])
-	program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6 -8, 11]]
-	program_output = [-12, -20, -32, -36, -68]
 
-#	flag1, program1 = find_functions()
+
+#	flag1, program1 = judge_program([12, 11, 9, 8, 17, 25])
+
+	flag1, program1 = find_functions()
 
 
 	if flag1:
