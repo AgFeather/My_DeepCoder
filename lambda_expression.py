@@ -58,8 +58,10 @@ basic_function = {16:['>0', lambda x: True if x>0 else False, [0], [3]],
 
 
 
-probabilities = [0.1,0.35,0.2,0.1,0.5,0.4,0.3,0.21,0.2,0.1,0.4,0.2,0.87,0.1,0.1,0.3,0.62,0.81,0.25,0.54,0.88,0.14,0.2,0.1,0.42,0.2,0.7,0.1,
-					0.1,0.3,0.23,0.12] 
+probabilities = [0.1, 0.35, 0.2, 0.1, 0.5, 0.4, 0.3, 0.921, 0.92, 0.1, 
+				0.94, 0.92, 0.87, 0.1, 0.1, 0.3, 0.962, 0.81, 0.25, 0.54,
+				0.88, 0.14, 0.12, 0.21, 0.942, 0.2, 0.7, 0.1, 0.1, 0.3,
+				0.23, 0.12, 0.22, 0.31] 
 
     # x_dataset:[
     # num_program, 
@@ -80,35 +82,38 @@ program_output = [-12, -20, -32, -36, -68]
 
 def find_functions():
 	probabilities_tuple = []
-	for i in range(1,32):
-		probabilities_tuple.append((probabilities[i], i))
+	for i in range(1,35):
+		probabilities_tuple.append((probabilities[i-1], i))
 	func_prob_tuples = sorted(probabilities_tuple, key=lambda x:x[0], reverse=True)
 	# sort with the probilities and [0] means the most probable func
-#	print(func_prob_tuples)
+	print(func_prob_tuples)
 	
 	#DFS method to find a program
-	for i in range(0, 31):
+	for i in range(0, 35):
 		function1 = func_prob_tuples[i][1]
-		for j in range(i+1, 31):
+		for j in range(i+1, 35):
 			function2 = func_prob_tuples[j][1]
-			for k in range(j+1, 31):
+			for k in range(j+1, 35):
 				function3 = func_prob_tuples[k][1]
-				for m in range(k+1, 31):
+				for m in range(k+1, 35):
 					function4 = func_prob_tuples[m][1]
-					for n in range(m+1, 31):
+					for n in range(m+1, 35):
 						function5 = func_prob_tuples[n][1]
-						function_list = []
-						function_list.append(function1)
-						function_list.append(function2)
-						function_list.append(function3)
-						function_list.append(function4)
-						function_list.append(function5)
-					#	print(function_list)
-						judge, program = create_program(function_list)
-						if judge == True:
-							return True, program
-						else:
-							print('this is a wrong fucntion combination, lets check next')
+						for y in range(n+1, 35):
+							function6 = func_prob_tuples[y][1]
+							function_list = []
+							function_list.append(function1)
+							function_list.append(function2)
+							function_list.append(function3)
+							function_list.append(function4)
+							function_list.append(function5)
+							function_list.append(function6)
+						#	print(function_list)
+							judge, program = create_program(function_list)
+							if judge == True:
+								return True, program
+							else:
+								print('this is a wrong fucntion combination, lets check next')
 
 	return False, None
 
@@ -117,7 +122,7 @@ def find_functions():
 
 import itertools
 def create_program(function_list):
-#	print(function_list)
+	print(function_list)
 
 	#check is there higher order function in function_list
 	#if we have higher_order_functions but we don not have 
@@ -134,10 +139,10 @@ def create_program(function_list):
 		print('there is no basic lambda expression for higher_order_function, error')
 		return False, None
 
-
 	#do permutations operations for all functions in the list
 	program_list = list(itertools.permutations(function_list, len(function_list))) #get all possible programs with given functions
 #	print(program_list)
+
 
 	for program in program_list:
 		print('\nwe will check program: ', program)
@@ -149,6 +154,7 @@ def create_program(function_list):
 			print('this is a wrong program, lets check next')
 	return False, None
 	
+
 
 
 
@@ -330,21 +336,18 @@ def judge_program(program):
 
 if __name__ == '__main__':
 	
-#	find_functions()
 
-#	create_program([6, 12, 20, 26, 4])
-#	create_program([1,2,3,4,5])
-#	flag, program = judge_program([8,9,11,12,17,25])
 
 	# program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6 -8, 11]]
 	# program_output = [-12, -20, -32, -36, -68]
 
 
 
-#	flag1, program1 = judge_program([12, 11, 9, 8, 17, 25])
+
 
 	flag1, program1 = find_functions()
-
+#	flag1, program1 = create_program([8,9,11,12,17,25])
+#	flag1, program1 = judge_program([12, 11, 9, 8, 17, 25])
 
 	if flag1:
 		print('\nright, it is the correct answer', program1)
