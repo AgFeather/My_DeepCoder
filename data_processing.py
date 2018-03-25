@@ -60,7 +60,7 @@ def each_x_data_deal(data):
     return ret_in_out_pairs_lists
     
     
-
+    
 
 def input_output_array_deal(element):
     type_ = type_find(element)#return the type of this input, encode by one-hot-encoding

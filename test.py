@@ -79,10 +79,11 @@ print(probabilities)
     # num_attributes(34)
     # ]
 max_input_number = 3 #一个程序的最多输入参数个数
-program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6, -8, 11]]
-program_output = [-12, -20, -32, -36, -68]
+# program_input_list = [[-17, -3, 4, 11, 0, -5, -9, 13, 6 ,6, -8, 11]]
+# program_output = [-12, -20, -32, -36, -68]
 # attributes = [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-
+program_input_list = [[8,5,7,2,5]]
+program_output = 5
 
 
 def find_functions():
@@ -106,6 +107,8 @@ def find_functions():
 						function5 = func_prob_tuples[n][1]
 						for y in range(n+1, 34):
 							function6 = func_prob_tuples[y][1]
+
+
 							function_list = []
 							function_list.append(function1)
 							function_list.append(function2)
@@ -339,6 +342,13 @@ def judge_program(program):
 
 
 
+def check_pro_test():
+	input_temp_values_map = {}
+	env = {}
+
+
+
+
 
 
 
@@ -355,7 +365,7 @@ if __name__ == '__main__':
 
 	flag1, program1 = find_functions()
 #	flag1, program1 = create_program([8,9,11,12,17,25])
-#	flag1, program1 = judge_program([12, 11, 9, 8, 17, 25])
+#	flag1, program1 = judge_program([27, 31, 33, 10, 13, 15])
 
 	if flag1:
 		print('\nright, it is the correct answer', program1)
